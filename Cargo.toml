@@ -1,0 +1,48 @@
+[package]
+name = "zero2prod"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "zero2prod"
+path = "src/main.rs"
+
+[dependencies]
+# We are using the latest beta release of actix-web
+# that relies on tokio 1.x.x
+# There is _some_ turbulence when working with betas,
+# we are pinning a few other supporting packages to ensure
+# compatibility.
+actix-web = "=4.0.0-beta.8"
+actix-http = "=3.0.0-beta.8"
+anyhow = "1.0"
+tokio = "1.0"
+serde = { version = "1.0", features = ["derive"]}
+uuid = { version = "0.8", features = ["v4"]} 
+chrono = "0.4"
+lazy_static = "1.4.0"
+dotenv = "0.15"
+
+# Using table-like toml syntax to avoid a super-long line!
+[dependencies.sqlx]
+version = "0.5.5"
+default-features = false
+features = [
+"runtime-actix-rustls",
+"macros",
+"postgres",
+"uuid",
+"chrono",
+"migrate"
+]
+
+[dev-dependencies]
+pretty_assertions = "0.7.2"
+actix-rt = "2.0"
+reqwest = "0.11"
+

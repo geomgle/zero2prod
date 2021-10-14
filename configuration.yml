@@ -1,0 +1,8 @@
+# configuration.yaml
+application_port: 8000
+database:
+  host: "db"
+  port: 5432
+  username: "geomma"
+  password: "samplepassword"
+  database_name: "newsletter"
