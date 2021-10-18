@@ -3,12 +3,12 @@ use std::net::TcpListener;
 use pretty_assertions::assert_eq;
 use reqwest;
 use sqlx::PgPool;
-use zero2prod::startup::run;
+use zero2prod::{configuration::Settings, startup::run};
 
-lazy_static::lazy_static! {
-    static ref APPLICATION_PORT: String =  dotenv::var("APPLICATION_PORT").unwrap();
-    static ref DATABASE_URL: String =  dotenv::var("DATABASE_URL").unwrap();
-}
+// lazy_static::lazy_static! {
+// static ref APPLICATION_PORT: String =
+// dotenv::var("APPLICATION_PORT").unwrap(); static ref DATABASE_URL: String =
+// dotenv::var("DATABASE_URL").unwrap(); }
 
 struct TestApp {
     address: String,
@@ -16,7 +16,7 @@ struct TestApp {
 }
 
 #[actix_rt::test]
-pub(crate) async fn check_health_works() {
+async fn check_health_works() {
     let app = spawn_app().await;
     let client = reqwest::Client::new();
 
@@ -35,15 +35,20 @@ async fn spawn_app() -> TestApp {
         TcpListener::bind("0.0.0.0:0").expect("failed to bind to random port");
     let port = listener.local_addr().unwrap().port();
     let address = format!("http://0.0.0.0:{}", port);
-    let db_pool = PgPool::connect(&DATABASE_URL)
+
+    let config = Settings::from_env().expect("failed to load .env file");
+    let db_pool = PgPool::connect(&config.database.connection_string())
         .await
-        .expect("failed to connect to postgres");
+        .expect("failed to connect pgpool");
 
     let server =
         run(listener, db_pool.clone()).expect("failed to spawn our app");
     let _ = tokio::spawn(server);
 
-    TestApp { address, db_pool }
+    TestApp {
+        address,
+        db_pool,
+    }
 }
 
 #[actix_rt::test]
@@ -94,6 +99,7 @@ async fn subscribe_returns_a_400_when_data_is_missing() {
 
         // Assert
         assert_eq!(400, response.status().as_u16(),
-        "The API did not fail with 400 Bad Request when the payload was {}.", error_message);
+"The API did not fail with 400 Bad Request when the payload was {}.",
+error_message);
     }
 }

@@ -18,19 +18,21 @@ path = "src/main.rs"
 # There is _some_ turbulence when working with betas,
 # we are pinning a few other supporting packages to ensure
 # compatibility.
-actix-web = "=4.0.0-beta.8"
-actix-http = "=3.0.0-beta.8"
-anyhow = "1.0"
-tokio = "1.0"
-serde = { version = "1.0", features = ["derive"]}
-uuid = { version = "0.8", features = ["v4"]} 
-chrono = "0.4"
-lazy_static = "1.4.0"
-dotenv = "0.15"
+actix-web = "4.0.0-beta.9"
+actix-http = "3.0.0-beta.10"
+anyhow = "1.0.44"
+tokio = "1.12.0"
+serde = { version = "1.0.130", features = ["derive"] }
+uuid = { version = "0.8.2", features = ["v4"] } 
+chrono = "0.4.19"
+dotenv = "0.15.0"
+envy = "0.4.2"
+pretty_env_logger = "0.4.0"
+log = "0.4.14"
 
 # Using table-like toml syntax to avoid a super-long line!
 [dependencies.sqlx]
-version = "0.5.5"
+version = "0.5.9"
 default-features = false
 features = [
 "runtime-actix-rustls",
@@ -42,7 +44,8 @@ features = [
 ]
 
 [dev-dependencies]
-pretty_assertions = "0.7.2"
-actix-rt = "2.0"
-reqwest = "0.11"
+pretty_assertions = "1.0.0"
+actix-rt = "2.3.0"
+reqwest = "0.11.5"
+mockall = "0.10.2"
 
