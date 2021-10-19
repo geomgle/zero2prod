@@ -6,6 +6,7 @@ use zero2prod::{configuration::Settings, startup::run};
 
 #[actix_web::main]
 async fn main() -> Result<()> {
+    std::env::set_var("RUST_LOG", "trace");
     pretty_env_logger::init();
 
     let config = Settings::from_env().expect("failed to load .env file");
