@@ -11,7 +11,8 @@ pub use actix_web::{
     HttpServer,
     Responder,
 };
-pub use anyhow::{Context, Result};
+
+pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 pub mod configuration;
 pub mod routes;

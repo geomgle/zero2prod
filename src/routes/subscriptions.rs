@@ -1,6 +1,7 @@
 use actix_web::{web, HttpResponse};
 use chrono::Utc;
 use sqlx::{query, Connection, PgPool};
+use tracing_futures::Instrument;
 use uuid::Uuid;
 
 use crate::FormData;
@@ -17,10 +18,9 @@ pub async fn subscribe(
         subscriber_name = %form.name
     );
     let _req_span_guard = request_span.enter();
-    tracing::info!(
-        "request_id {} - saving new subscriber details in the database",
-        request_id
-    );
+
+    let query_span =
+        tracing::info_span!("saving new subscriber details in the database");
     match sqlx::query!(
         r#"
         INSERT INTO subscriptions(id, email, name, subscribed_at)
@@ -32,6 +32,7 @@ pub async fn subscribe(
         Utc::now(),
     )
     .execute(pool.get_ref())
+    .instrument(query_span)
     .await
     {
         Ok(_) => {
