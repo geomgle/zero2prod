@@ -29,9 +29,9 @@ dotenv = "0.15.0"
 envy = "0.4.2"
 tracing = { version = "0.1.29", features = ["log"] }
 tracing-subscriber = { version = "0.2.25", features = ["env-filter", "registry"] }
-tracing-futures = "0.2.5"
 tracing-bunyan-formatter = "0.2.6"
 tracing-log = "0.1.2"
+tracing-actix-web = "0.4.0-beta.8"
 
 # Using table-like toml syntax to avoid a super-long line!
 [dependencies.sqlx]

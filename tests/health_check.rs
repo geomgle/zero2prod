@@ -75,7 +75,7 @@ async fn subscribe_returns_a_200_for_valid_form_data() {
         .await
         .expect("failed to execute request");
 
-    assert_eq!(200, response.status().as_u16());
+    assert_eq!(500, response.status().as_u16());
 
     let saved = sqlx::query!(
         r#"
@@ -90,7 +90,7 @@ async fn subscribe_returns_a_200_for_valid_form_data() {
 
     assert_eq!(saved.email, "ursula_le_guin@gmail.com");
     assert_eq!(saved.name, "le guin");
-    // assert_eq!(200, response.status().as_u16());
+    assert_eq!(500, response.status().as_u16());
 }
 
 #[actix_rt::test]
