@@ -1,14 +1,22 @@
 use std::net::TcpListener;
 
+use once_cell::sync::Lazy;
 use pretty_assertions::assert_eq;
 use reqwest;
 use sqlx::PgPool;
-use zero2prod::{configuration::Settings, startup::run};
+use zero2prod::{
+    configuration::Settings,
+    startup::run,
+    telemetry::{get_subscriber, init_subscriber},
+};
 
-// lazy_static::lazy_static! {
-// static ref APPLICATION_PORT: String =
-// dotenv::var("APPLICATION_PORT").unwrap(); static ref DATABASE_URL: String =
-// dotenv::var("DATABASE_URL").unwrap(); }
+static TRACING: Lazy<()> = Lazy::new(|| {
+    if std::env::var("TEST_LOG").is_ok() {
+        init_subscriber(get_subscriber("test", "info", std::io::stdout));
+    } else {
+        init_subscriber(get_subscriber("test", "info", std::io::sink));
+    }
+});
 
 struct TestApp {
     address: String,
@@ -31,6 +39,8 @@ async fn check_health_works() {
 }
 
 async fn spawn_app() -> TestApp {
+    Lazy::force(&TRACING);
+
     let listener =
         TcpListener::bind("0.0.0.0:0").expect("failed to bind to random port");
     let port = listener.local_addr().unwrap().port();
@@ -65,12 +75,18 @@ async fn subscribe_returns_a_200_for_valid_form_data() {
         .await
         .expect("failed to execute request");
 
-    // assert_eq!(200, response.status().as_u16());
+    assert_eq!(200, response.status().as_u16());
 
-    let saved = sqlx::query!("SELECT email, name FROM subscriptions")
-        .fetch_one(&app.db_pool)
-        .await
-        .expect("Failed to fetch saved subscription.");
+    let saved = sqlx::query!(
+        r#"
+        SELECT email, name 
+            FROM subscriptions 
+            WHERE email = 'ursula_le_guin@gmail.com'
+        "#
+    )
+    .fetch_one(&app.db_pool)
+    .await
+    .expect("Failed to fetch saved subscription.");
 
     assert_eq!(saved.email, "ursula_le_guin@gmail.com");
     assert_eq!(saved.name, "le guin");
@@ -102,7 +118,7 @@ async fn subscribe_returns_a_400_when_data_is_missing() {
             400,
             response.status().as_u16(),
             "The API did not fail with 400 Bad Request when the payload was {}.",
-            error_message
+            error_message,
         );
     }
 }

@@ -17,6 +17,7 @@ pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 pub mod configuration;
 pub mod routes;
 pub mod startup;
+pub mod telemetry;
 
 #[derive(serde::Deserialize)]
 pub struct FormData {

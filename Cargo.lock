@@ -2503,6 +2503,7 @@ dependencies = [
  "dotenv",
  "envy",
  "mockall",
+ "once_cell",
  "pretty_assertions",
  "reqwest",
  "serde",
