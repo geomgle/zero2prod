@@ -47,12 +47,17 @@ pub async fn insert_subscriber(pool: &PgPool, form: &FormData) -> Result<()> {
     Ok(())
 }
 
-pub async fn remove_subscriber(pool: &PgPool, form: &FormData) -> Result<()> {
+
+#[tracing::instrument(
+    name = "delete existing subscriber in the database",
+    skip(form, pool)
+)]
+pub async fn delete_subscriber(pool: &PgPool, form: &FormData) -> Result<()> {
     sqlx::query!(
         r#"
         DELETE FROM subscriptions
-        WHERE email = 'ursula_le_guin@gmail.com';
-        "#
+        WHERE email = 'ursula_le_guin@gmail.com'
+        "#,
     )
     .execute(pool)
     .await
@@ -62,3 +67,4 @@ pub async fn remove_subscriber(pool: &PgPool, form: &FormData) -> Result<()> {
     })?;
     Ok(())
 }
+

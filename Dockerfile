@@ -7,4 +7,4 @@ RUN cargo install cargo-watch sqlx-cli
 
 WORKDIR /app
 
-ENTRYPOINT ["cargo"]
+# ENTRYPOINT ["cargo"]
