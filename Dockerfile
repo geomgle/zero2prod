@@ -1,21 +1,10 @@
-# Build rust
-FROM rust:latest as build
-MAINTAINER Eunjin Sul <eunjin.sul@gmail.com>
+# We use the latest Rust nightly release as base image
+FROM rustlang/rust:nightly
 
-ENV PKG_CONFIG_ALLOW_CROSS=1
-ARG APP
+ENV SQLX_OFFLINE true
 
-WORKDIR /usr/src/$APP
-COPY . .
+RUN cargo install cargo-watch sqlx-cli  
 
-RUN cargo install sqlx-cli --no-default-features --features postgres
-RUN cargo install --path .
+WORKDIR /app
 
-# Make the release 
-FROM gcr.io/distroless/cc
-
-ARG APP
-
-COPY --from=build /usr/local/cargo/bin/$APP usr/bin/app
-
-ENTRYPOINT ["app"]
+ENTRYPOINT ["cargo"]

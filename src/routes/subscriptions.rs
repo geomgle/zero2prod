@@ -46,3 +46,19 @@ pub async fn insert_subscriber(pool: &PgPool, form: &FormData) -> Result<()> {
     })?;
     Ok(())
 }
+
+pub async fn remove_subscriber(pool: &PgPool, form: &FormData) -> Result<()> {
+    sqlx::query!(
+        r#"
+        DELETE FROM subscriptions
+        WHERE email = 'ursula_le_guin@gmail.com';
+        "#
+    )
+    .execute(pool)
+    .await
+    .map_err(|e| {
+        tracing::error!("failed to execute query: {:#?}", e);
+        e
+    })?;
+    Ok(())
+}
