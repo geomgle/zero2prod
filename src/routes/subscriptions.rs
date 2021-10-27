@@ -47,7 +47,6 @@ pub async fn insert_subscriber(pool: &PgPool, form: &FormData) -> Result<()> {
     Ok(())
 }
 
-
 #[tracing::instrument(
     name = "delete existing subscriber in the database",
     skip(form, pool)

@@ -1,5 +1,19 @@
-#!/bin/bash
+#!/bin/sh
 
-# cargo sqlx prepare -D postgres://geomma:samplepassword@db:5432/nesletter -- --bin zero2prod
-# cargo watch --watch src --exec run
-cargo watch --watch src -x 'sqlx prepare -D postgres://geomma:samplepassword@db:5432/nesletter -- --bin zero2prod' -x 'run' 
+sigint_handler() 
+{
+    kill $PID
+    exit
+}
+
+trap sigint_handler SIGINT
+
+while true; do
+    clear
+    cargo sqlx prepare -D postgres://geomma:samplepassword@db:5432/newsletter -- --bin zero2prod --target-dir /home/target
+    cargo run --target-dir /home/target & 
+    PID=$!
+    inotifywait src -r -e close_write
+    kill $PID
+done
+

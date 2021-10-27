@@ -1,3 +1,52 @@
 {
-  "db": "PostgreSQL"
+  "db": "PostgreSQL",
+  "18f5980888d04dd35c355fe0829172c7be06e3a14b2341caaac8af1e6e2e5fb1": {
+    "query": "\n        DELETE FROM subscriptions\n        WHERE email = 'ursula_le_guin@gmail.com'\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": []
+    }
+  },
+  "b1e51d9c64b3d93ee881899d26635b16e52c349294d7d190d01ee665f2ec5a72": {
+    "query": "\n        INSERT INTO subscriptions(id, email, name, subscribed_at)\n        VALUES ($1, $2, $3, $4);\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text",
+          "Timestamptz"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "ebbfaa6b67f3fcff5d8feb58c6cb2ca25888a7f29e68ca22ef99182f1d8d7609": {
+    "query": "\n        SELECT email, name \n            FROM subscriptions \n            WHERE email = 'ursula_le_guin@gmail.com'\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "email",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  }
 }
