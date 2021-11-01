@@ -20,6 +20,7 @@ COPY --from=cacher /app/target target
 COPY --from=cacher /usr/local/cargo /usr/local/cargo
 COPY . .
 ENV SQLX_OFFLINE true
+ARG DATABASE_URL
 # Build our application, leveraging the cached deps!
 RUN cargo build --release --bin zero2prod
 
