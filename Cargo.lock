@@ -2518,6 +2518,7 @@ dependencies = [
  "actix-http",
  "actix-rt",
  "actix-web",
+ "ansi_term",
  "anyhow",
  "chrono",
  "dotenv",
@@ -2534,6 +2535,7 @@ dependencies = [
  "tracing-bunyan-formatter",
  "tracing-log",
  "tracing-subscriber",
+ "unicode-segmentation",
  "uuid",
 ]
 

@@ -1,0 +1,65 @@
+#!/bin/bash
+############################################################
+# Help                                                     #
+############################################################
+Help()
+{
+   # Display Help
+   echo "Run cargo command with watching source change by inotifywait."
+   echo
+   echo "Syntax: inoticargo [-c|r|t|h]"
+   echo "options:"
+   echo "c     Cargo check."
+   echo "r     Cargo run."
+   echo "t     Cargo test -- --show-output."
+   echo "h     Print this Help."
+   echo
+}
+
+############################################################
+############################################################
+# Main program                                             #
+############################################################
+############################################################
+
+# Set variables
+Action=
+Path="src"
+
+sigint_handler() 
+{
+    kill $PID
+    exit
+}
+
+############################################################
+# Process the input options. Add options as needed.        #
+############################################################
+# Get the options
+while getopts ":crth:" option; do
+   case $option in
+      c) # Cargo check
+         Action="check";;
+      r) # Cargo run
+         Action="run";;
+      t) # Cargo test
+         Action="test -- --show-output"
+         Path="tests";;
+      h) # display Help
+         Help
+         exit;;
+     \?) # Invalid option
+         echo "Error: Invalid option"
+         exit;;
+   esac
+done
+
+trap sigint_handler SIGINT
+
+while true; do
+    clear
+    cargo $Action &
+    PID=$!
+    inotifywait $Path -r -e modify
+    kill $PID
+done

@@ -9,6 +9,7 @@ sigint_handler()
 trap sigint_handler SIGINT
 
 while true; do
+    clear
     cargo check 
     inotifywait src -r -e modify
 done

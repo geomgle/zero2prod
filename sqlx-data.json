@@ -24,29 +24,5 @@
       },
       "nullable": []
     }
-  },
-  "ebbfaa6b67f3fcff5d8feb58c6cb2ca25888a7f29e68ca22ef99182f1d8d7609": {
-    "query": "\n        SELECT email, name \n            FROM subscriptions \n            WHERE email = 'ursula_le_guin@gmail.com'\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "email",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 1,
-          "name": "name",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false
-      ]
-    }
   }
 }

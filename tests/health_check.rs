@@ -1,5 +1,6 @@
 use std::net::TcpListener;
 
+use anyhow::Result;
 use once_cell::sync::Lazy;
 use pretty_assertions::assert_eq;
 use reqwest;
@@ -35,7 +36,7 @@ async fn check_health_works() {
         .expect("failed to execute request");
 
     assert!(response.status().is_success());
-    assert_eq!(Some(25), response.content_length());
+    assert_eq!(Some(20), response.content_length());
 }
 
 async fn spawn_app() -> TestApp {
@@ -50,6 +51,15 @@ async fn spawn_app() -> TestApp {
     let db_pool = PgPool::connect(&config.database.connection_string())
         .await
         .expect("failed to connect pgpool");
+    sqlx::query!(
+        r#"
+        CREATE TEMP TABLE subscriptions
+        AS SELECT * FROM subscriptions LIMIT 0
+    "#
+    )
+    .execute(&db_pool)
+    .await
+    .expect("failed to create temp table");
 
     let server =
         run(listener, db_pool.clone()).expect("failed to spawn our app");
@@ -75,7 +85,7 @@ async fn subscribe_returns_a_200_for_valid_form_data() {
         .await
         .expect("failed to execute request");
 
-    assert_eq!(500, response.status().as_u16());
+    assert_eq!(200, response.status().as_u16());
 
     let saved = sqlx::query!(
         r#"
@@ -90,7 +100,7 @@ async fn subscribe_returns_a_200_for_valid_form_data() {
 
     assert_eq!(saved.email, "ursula_le_guin@gmail.com");
     assert_eq!(saved.name, "le guin");
-    assert_eq!(500, response.status().as_u16());
+    assert_eq!(200, response.status().as_u16());
 }
 
 #[actix_rt::test]
@@ -121,4 +131,43 @@ async fn subscribe_returns_a_400_when_data_is_missing() {
             error_message,
         );
     }
+}
+
+#[actix_rt::test]
+async fn subscribe_returns_a_200_when_fields_are_present_but_empty(
+) -> Result<()> {
+    let app = spawn_app().await;
+    let client = reqwest::Client::new();
+    let test_cases = vec![
+        ("name=&email=la_le_guin%40gmail.com", "empty name"),
+        ("name=Ursula&email=", "empty email"),
+        ("name=Ursula&email=definitely-not-an-email", "invalid email"),
+    ];
+
+    for (body, error_message) in test_cases {
+        // Act
+        let response = client
+            .post(&format!("{}/subscriptions", &app.address))
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .body(body)
+            .send()
+            .await
+            .map_err(|e| {
+                println!(
+                    "\x1b[1m\x1b[38;2;235;125;125m failed to execute request: \
+                    \x1b[0m\x1b[38;2;235;125;125m{:#?}\x1b[0m",
+                    e
+                );
+                e
+            })?;
+
+        // Assert
+        assert_eq!(
+            400,
+            response.status().as_u16(),
+            "The API did not return a 200 OK when the payload was {}.",
+            error_message,
+        );
+    }
+    Ok(())
 }

@@ -15,6 +15,7 @@ pub use actix_web::{
 pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 pub mod configuration;
+pub mod domain;
 pub mod routes;
 pub mod startup;
 pub mod telemetry;
