@@ -1,40 +1,31 @@
-FROM lukemathwalker/cargo-chef:latest-rust-1.53.0 as planner
-WORKDIR /app
-COPY . .
-# Compute a lock-like file for our project
-RUN cargo chef prepare --recipe-path recipe.json
+# We use the latest Rust nightly release as base image
+# FROM debian:stable-slim
+FROM rustlang/rust:nightly
+MAINTAINER Eunjin Sul <eunjin.sul@gmail.com>
 
-
-FROM lukemathwalker/cargo-chef:latest-rust-1.53.0 as cacher
-
-WORKDIR /app
-COPY --from=planner /app/recipe.json recipe.json
-# Build our project dependencies, not our application!
-RUN cargo chef cook --release --recipe-path recipe.json
-
-
-FROM rust:1.53.0 AS builder
-WORKDIR /app
-# Copy over the cached dependencies
-COPY --from=cacher /app/target target
-COPY --from=cacher /usr/local/cargo /usr/local/cargo
-COPY . .
 ENV SQLX_OFFLINE true
-# Build our application, leveraging the cached deps!
-RUN cargo build --release --bin zero2prod
+ENV HOME /home 
 
+ARG UID
+ARG GID
+ARG DOCKER_USER=default_user
 
-# FROM debian:buster-slim AS runtime
-# WORKDIR /app
-# # Install OpenSSL - it is dynamically linked by some of our dependencies
-# RUN apt-get update -y \
-# && apt-get install -y --no-install-recommends openssl \
-# # Clean up
-# && apt-get autoremove -y \
-# && apt-get clean -y \
-# && rm -rf /var/lib/apt/lists/*
-# COPY --from=builder /app/target/release/zero2prod zero2prod
+RUN apt-get update -qq && \
+    apt-get install -y \
+    inotify-tools
 
-# COPY .env .env 
-# # ENV APP_ENVIRONMENT production
-# ENTRYPOINT ["/bin/bash"]
+RUN mkdir -p /app
+
+# Create a group and user
+RUN groupadd -g $GID $DOCKER_USER && \
+    useradd --no-create-home --shell /bin/bash --home $HOME -u $UID -g $GID $DOCKER_USER && \
+    chown -R $DOCKER_USER:$DOCKER_USER /home && \
+    chown -R $DOCKER_USER:$DOCKER_USER /app
+
+USER $DOCKER_USER
+
+RUN cargo install sqlx-cli
+
+RUN mkdir -p /home/target
+
+WORKDIR /app
